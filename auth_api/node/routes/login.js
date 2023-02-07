@@ -1,12 +1,30 @@
-import { loginFunction } from '../services/login';
+const { loginFunction } = require('../services/login');
+const {ERROR_CODE, SUCCESS_CODE} = require("../constants/response");
 
-export const login = (req, res, next) => {
-  let username = req.body.username;
-  let password = req.body.password;
+const login = async (req, res, next) => {
+  try {
+    let username = req.body.username;
+    let password = req.body.password;
+
+    const loginResponse = await loginFunction(username, password);
+
+    if(loginResponse.success){
+      res.status(SUCCESS_CODE).send({data: loginResponse.data});
+      next();
+      return;
+    }
  
-  let response = {
-    "data": loginFunction(username, password)
-  };
-  res.send(response);
-  next();
+    res.status(ERROR_CODE).send({data: loginResponse.data});
+    next();
+    return;
+
+  } catch (error) {
+    res.status(ERROR_CODE).send({data: loginResponse.data});
+    next();
+    return;
+  }
+}
+
+module.exports = {
+  login
 }
